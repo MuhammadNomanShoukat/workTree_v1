@@ -1028,14 +1028,16 @@ document.addEventListener("DOMContentLoaded", async () => {
                 console.warn("AttendanceCrashStatus is not available in data.");
             }
 
+            console.log("outer")
+
             if(crashLoginResponse != ""){
                 const parseData = JSON.parse(crashLoginResponse)
                 console.log(parseData)
                 if(parseData.status){
-                    if(parseData.data.status === "Success"){
+                    if(parseData.data.Status === "Success"){
                         console.log("============================")
                         console.log("Crash login called...")
-                        const startApp = await window.pywebview.api.start_app(data);
+                        const startApp = await window.pywebview.api.start_app_intervals(data);
                         console.log("inactivity called...")
                         console.log("============================")
                     }else{
@@ -1044,6 +1046,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                         return;
                     }
                 }
+            }else{
+                await window.pywebview.api.start_app_intervals(data);
             }
 
             console.log("Crash login Response: ", response)
@@ -1052,7 +1056,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             await getBreakTypes(data.EID);
             localStorage.setItem("user_data", JSON.stringify(data));
 
-            const totalBreakMinutes = parseInt(data.OtherBreakLogoutTime);
+            totalBreakMinutes = parseInt(data.OtherBreakLogoutTime);
+            console.log(data.OtherBreakLogoutTime)
+
+            console.log("break minitues: ", totalBreakMinutes)
+            console.log("Data: ", data)
+
             const empName = `${data.EmpFirstName} ${data.EmpLastName}`;
             const empShift = convertTimeRangeFromGMT(
                 `${formatTimeForDisplay(data.ShiftStartTime)} - ${formatTimeForDisplay(data.ShiftEndTime)}`
@@ -1716,7 +1725,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (el) {
         el.click();
         loadRememberMeData()
-        versionCheck()
+<!--        versionCheck()-->
         await getAppVersion()
 
       }
@@ -1813,20 +1822,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
     function showConnectivityToast(isOnline) {
-<!--      toastEl.classList.remove('bg-success', 'bg-danger');-->
 
       if (isOnline) {
-<!--        toastEl.classList.add('bg-success');-->
-<!--        toastBody.textContent = '✅ You are back online';-->
+
         internetOverlay.classList.add('d-none'); // Hide overlay
-<!--        connectivityToast.show();-->
-<!--        setTimeout(() => connectivityToast.hide(), 3000);-->
+        console.log("inactivity called from internet")
+        callLastInactivity()
+
       } else {
-<!--        toastEl.classList.add('bg-danger');-->
-<!--        toastBody.textContent = '❌ You are offline';-->
+
         internetOverlay.classList.remove('d-none'); // Show overlay
-<!--        connectivityToast.show(); // Stays until manually closed-->
+
       }
+    }
+
+    async function callLastInactivity() {
+        await window.pywebview.api.manually_call_lastInactivity();
     }
 
     // Detect real browser connection status

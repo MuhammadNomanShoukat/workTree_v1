@@ -279,13 +279,15 @@ class API:
             webview.windows[0].evaluate_js("onInternetDisconnectedTimeExceed();")
 
     def notify_online(self):
+        pass
+
+    def manually_call_lastInactivity(self):
         global logged_in_user_info
-        print("***** internet online *******:", logged_in_user_info)
+        print("***** manually_call_lastInactivity *******:", logged_in_user_info)
         if logged_in_user_info is not None:
             start_get_service_interval()
             self.start_inactivity()
             API.lastactivitydate(logged_in_user_info["EID"], "True", "", "")
-
 
     def notify_offline(self):
         print("***** internet offline *******")
@@ -392,7 +394,7 @@ class API:
         return json.dumps(
             {"status": False, "msg": "Unable to connect to the server. Network Error.", "data": {}})
 
-    def start_app(self, data):
+    def start_app_intervals(self, data):
         if not self.is_user_logged_in():
             return
 
@@ -1464,7 +1466,7 @@ def start_app(api, html_file):
 
 
 
-    webview.start(debug=True, gui='edgechromium', func=set_window_icon)
+    webview.start(debug=False, gui='edgechromium', func=set_window_icon)
 
 
 def inactivity_window(api, html_file):
