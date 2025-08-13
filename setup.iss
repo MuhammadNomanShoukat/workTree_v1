@@ -2,7 +2,7 @@
 
 [Setup]
 AppName={#MyAppName}
-AppVersion=1.0.9
+AppVersion=1.1.2
 AppID={#MyAppName}App
 AppPublisher=Bioncos Global - IT Solutions
 AppPublisherURL=https://personalcompany.example.com
@@ -15,7 +15,7 @@ Compression=lzma
 SolidCompression=yes
 DisableProgramGroupPage=yes
 UninstallDisplayIcon={app}\main.exe
-SetupIconFile=dist\main\icon.ico   
+SetupIconFile=dist\main\icon.ico
 
 [Files]
 Source: "dist\main\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion

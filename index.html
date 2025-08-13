@@ -293,8 +293,8 @@
                                             <p class="shift-time" id="empShift"></p>
                                         </div>
                                         <div class="break-actions">
-                                            <img src="assets/images/play.png" width="10%" alt="timer" id="play" data-bs-toggle="modal" data-bs-target="#breakModal"/>
-                                            <img src="assets/images/pause.png" width="10%" alt="timer" id="pause" />
+                                            <img src="assets/images/play.png" width="10%" alt="timer" id="play" data-bs-toggle="modal" data-bs-target="#breakModal" title="Take a break"/>
+                                            <img src="assets/images/pause.png" width="10%" alt="timer" id="pause" title="End break"/>
                                             <!-- <img src="assets/images/stop.png" width="10%" alt="timer" id="stop" /> -->
                                         </div>
                                     </div>
@@ -311,14 +311,15 @@
                                   <div class="circle" id="loginCircle"></div>
                                   <div class="label">
                                     <h1>LOGIN TIME</h1>
-                                    <p id="login_time">1:10 pm</p>
+                                    <p id="login_time"></p>
                                   </div>
                                 </div>
                                 <div class="step">
                                   <div class="circle" id="breakCircle"></div>
                                   <div class="label">
                                     <h1>BREAK</h1>
-                                    <p><span id="break_startime">-</span> <span id="break_endtime"></span></p>
+<!--                                    <p><span id="break_startime">-</span> <span id="break_endtime"></span></p>-->
+                                      <p><span id="total_break"></span></p>
                                   </div>
                                 </div>
                                 <div class="step">
@@ -977,12 +978,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         rememberMe ? password : ""
     );
 
-    const now = new Date();
-    let hours = now.getHours();
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    const ampm = hours >= 12 ? 'pm' : 'am';
-    hours = hours % 12 || 12;
-    const formattedLoginTime = `${hours}:${minutes} ${ampm}`;
+<!--    const now = new Date();-->
+<!--    let hours = now.getHours();-->
+<!--    const minutes = now.getMinutes().toString().padStart(2, '0');-->
+<!--    const ampm = hours >= 12 ? 'pm' : 'am';-->
+<!--    hours = hours % 12 || 12;-->
+<!--    const formattedLoginTime = `${hours}:${minutes} ${ampm}`;-->
 
     try {
         const response = await window.pywebview.api.login(email, password);
@@ -1083,12 +1084,16 @@ document.addEventListener("DOMContentLoaded", async () => {
             const breakDetails = getServiceResponse?.["3)- breakDetails"];
             const profileAvatar = getServiceResponse?.["7)- ProfileImage"];
             const logData = convertLogToFormattedObjects(breakDetails);
+            const loginTime = convertGMTTimeToLocal(getServiceResponse?.["6)- timeIn"])
+            const totalBreak = secondsToHrsMins(getServiceResponse?.["2)- totalBreakTime"])
 
             if (profileAvatar) {
                 document.getElementById("profile_img").src = `https://worktre.com/assets/uploads/avatars/${profileAvatar}`;
             }
 
             console.log(getServiceResponse);
+            console.log(loginTime)
+            console.log(getServiceResponse?.["2)- totalBreakTime"])
 
             // Save globally
             paginatedLogData = logData;
@@ -1101,7 +1106,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             const { hours: resumeHour, minutes: resumeMinute } = parsePassedTime(passedTime);
 
             loginErrorNotify.innerHTML = "&nbsp;";
-            document.getElementById("login_time").innerText = formattedLoginTime;
+            document.getElementById("total_break").innerText = totalBreak;
+            document.getElementById("login_time").innerText = loginTime;
             document.getElementById("empName").innerText = empName;
             document.getElementById("empShift").innerText = empShift;
 
@@ -1146,6 +1152,27 @@ document.addEventListener("DOMContentLoaded", async () => {
         // alert("Login error.");
     }
 });
+
+    function secondsToHrsMins(totalSeconds) {
+        const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+        const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+        return `${hours} Hrs : ${minutes} Mins`;
+    }
+
+    function convertGMTTimeToLocal(timeStr) {
+        // Attach today's date to the time string and mark it as UTC
+        const today = new Date().toISOString().split("T")[0]; // yyyy-mm-dd
+        const gmtDateTime = `${today} ${timeStr} UTC`;
+
+        const date = new Date(gmtDateTime);
+
+        // Return formatted local time (hh:mm am/pm)
+        return date.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true
+        });
+    }
 
     function renderLogsToTable(data, tableBodySelector, page = 1) {
       const tbody = document.querySelector(tableBodySelector);
@@ -1837,7 +1864,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     async function callLastInactivity() {
-        await window.pywebview.api.manually_call_lastInactivity();
+        await window.pywebview.api.manually_call_lastInactivity(breakMarked);
     }
 
     // Detect real browser connection status

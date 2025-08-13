@@ -281,13 +281,14 @@ class API:
     def notify_online(self):
         pass
 
-    def manually_call_lastInactivity(self):
+    def manually_call_lastInactivity(self, breakFlag):
         global logged_in_user_info
         print("***** manually_call_lastInactivity *******:", logged_in_user_info)
         if logged_in_user_info is not None:
             start_get_service_interval()
             self.start_inactivity()
-            API.lastactivitydate(logged_in_user_info["EID"], "True", "", "")
+            print("+++++ Break flag ++++ :", breakFlag)
+            API.lastactivitydate(logged_in_user_info["EID"], breakFlag, "", "")
 
     def notify_offline(self):
         print("***** internet offline *******")
